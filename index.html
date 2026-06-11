@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Shannmithra Anand's developer portfolio — full-stack engineer specializing in accessible, performant web applications." />
+  <meta name="keywords" content="developer, portfolio, web development, accessibility, semantic HTML" />
+  <meta name="author" content="Shannmithra Anand" />
+  <meta property="og:title" content="Shannmithra Anand — Developer Portfolio" />
+  <meta property="og:description" content="Full-stack engineer who builds accessible, performant web experiences." />
+  <meta property="og:type" content="website" />
+  <title>Shannmithra Anand — Developer Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Tokens ──────────────────────────────────────────── */
+    :root {
+      --navy:    #0d1b2a;
+      --navy-2:  #132337;
+      --teal:    #2dd4bf;
+      --teal-dim:#1a9e8e;
+      --warm:    #f5f0e8;
+      --muted:   #8fa3b1;
+      --white:   #ffffff;
+      --radius:  6px;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+      --max-w: 900px;
+      --focus-ring: 0 0 0 3px var(--teal);
+    }
+
+    /* ── Reset ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--font-body);
+      background: var(--navy);
+      color: var(--warm);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    img { max-width: 100%; display: block; }
+    a { color: var(--teal); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--white); }
+    *:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius); }
+
+    /* ── Skip link ───────────────────────────────────────── */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      background: var(--teal);
+      color: var(--navy);
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      border-radius: 0 0 var(--radius) var(--radius);
+      z-index: 9999;
+      transition: top 0.15s;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ── Layout helpers ──────────────────────────────────── */
+    .container {
+      max-width: var(--max-w);
+      margin-inline: auto;
+      padding-inline: 1.5rem;
+    }
+    .section {
+      padding-block: 5rem;
+    }
+    .section + .section {
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    h1, h2, h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.15; }
+    h1 { font-size: clamp(2.4rem, 6vw, 4rem); }
+    h2 { font-size: clamp(1.8rem, 4vw, 2.5rem); margin-bottom: 0.5rem; }
+    h3 { font-size: 1.2rem; margin-bottom: 0.4rem; }
+    p  { color: var(--muted); max-width: 62ch; }
+
+    /* ── Header / Nav ────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13, 27, 42, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 3.75rem;
+    }
+    .logo {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--white);
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+    nav[aria-label="Primary"] ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    nav[aria-label="Primary"] a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    nav[aria-label="Primary"] a:hover,
+    nav[aria-label="Primary"] a[aria-current="page"] {
+      color: var(--white);
+    }
+    .nav-cta {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 1.1rem;
+      background: var(--teal);
+      color: var(--navy);
+      border-radius: 999px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .nav-cta:hover { background: var(--teal-dim); color: var(--white); }
+
+    /* ── Hero ────────────────────────────────────────────── */
+    #home {
+      padding-block: 6rem 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    #home::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 55% at 70% 40%, rgba(45,212,191,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(45,212,191,0.12);
+      border: 1px solid rgba(45,212,191,0.25);
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem;
+      font-size: 0.8rem;
+      color: var(--teal);
+      font-weight: 500;
+      margin-bottom: 1.75rem;
+    }
+    .hero-tag::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: var(--teal);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.75); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-tag::before { animation: none; }
+    }
+    .hero-headline { color: var(--white); margin-bottom: 1.25rem; }
+    .hero-headline em {
+      font-style: italic;
+      color: var(--teal);
+      font-weight: 300;
+    }
+    .hero-sub { font-size: 1.1rem; margin-bottom: 2.5rem; max-width: 52ch; }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.6rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--teal); color: var(--navy); }
+    .btn-primary:hover { background: var(--teal-dim); color: var(--white); }
+    .btn-outline {
+      border: 1.5px solid rgba(255,255,255,0.2);
+      color: var(--warm);
+    }
+    .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+
+
+
+
+    /* ── About ───────────────────────────────────────────── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      list-style: none;
+    }
+    .skills-list li {
+      background: rgba(45,212,191,0.1);
+      border: 1px solid rgba(45,212,191,0.2);
+      color: var(--teal);
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+    }
+
+    /* ── Projects ────────────────────────────────────────── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .card {
+      background: var(--navy-2);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 1.75rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover { border-color: var(--teal); transform: translateY(-3px); }
+    .card-icon {
+      width: 40px; height: 40px;
+      background: rgba(45,212,191,0.12);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      aria-hidden: true;
+    }
+    .card h3 { color: var(--white); }
+    .card p  { font-size: 0.875rem; margin-top: 0.4rem; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; list-style: none; }
+    .card-tags li {
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: rgba(255,255,255,0.05);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+    .card-link {
+      display: inline-block;
+      margin-top: 1.25rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--teal);
+      text-decoration: none;
+    }
+    .card-link:hover { text-decoration: underline; }
+    .card-link[aria-label]::after { content: ' →'; }
+
+    /* ── Contact ─────────────────────────────────────────── */
+    .contact-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    @media (max-width: 640px) { .contact-wrap { grid-template-columns: 1fr; } }
+
+    .contact-info address { font-style: normal; }
+    .contact-info address p { margin-bottom: 0.5rem; }
+
+    form { display: flex; flex-direction: column; gap: 1.25rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--warm);
+    }
+    input, textarea, select {
+      background: var(--navy-2);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--warm);
+      padding: 0.65rem 1rem;
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--teal);
+      box-shadow: var(--focus-ring);
+    }
+    textarea { resize: vertical; min-height: 130px; }
+    .form-desc { font-size: 0.78rem; color: var(--muted); }
+    .btn-submit {
+      align-self: flex-start;
+      background: var(--teal);
+      color: var(--navy);
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: var(--font-body);
+      transition: background 0.15s;
+    }
+    .btn-submit:hover { background: var(--teal-dim); color: var(--white); }
+    .btn-submit:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .required-note { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── Footer ──────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-block: 2.5rem;
+      font-size: 0.85rem;
+    }
+    footer .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    footer p { color: var(--muted); max-width: none; }
+    .social-links { display: flex; gap: 1.25rem; list-style: none; }
+    .social-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; }
+    .social-links a:hover { color: var(--teal); }
+  </style>
+</head>
+
+<body>
+
+  <!-- Skip navigation for keyboard users -->
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- ── Header ─────────────────────────────────────────── -->
+  <header role="banner">
+    <div class="container">
+      <a class="logo" href="#home" aria-label="Shannmithra Anand — home">Shannmithra.</a>
+
+      <nav aria-label="Primary">
+        <ul role="list">
+          <li><a href="#home"     aria-current="page">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+
+      <a class="nav-cta" href="#contact" aria-label="Hire Shannmithra">Hire me</a>
+    </div>
+  </header>
+
+  <!-- ── Main ───────────────────────────────────────────── -->
+  <main id="main-content" tabindex="-1">
+
+    <!-- Hero -->
+    <section id="home" aria-labelledby="hero-heading">
+      <div class="container">
+        <div class="hero-tag" role="status" aria-live="polite">Available for work</div>
+
+        <h1 class="hero-headline" id="hero-heading">
+          I build the web<br />
+          <em>for everyone.</em>
+        </h1>
+
+        <p class="hero-sub">
+          Full-stack developer crafting fast, accessible, semantically correct web experiences — from C to the cloud.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#projects">View my work</a>
+          <a class="btn btn-outline" href="#contact">Get in touch</a>
+        </div>
+
+
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="section" aria-labelledby="about-heading">
+      <div class="container">
+        <span class="eyebrow">About me</span>
+        <div class="about-grid">
+          <div>
+            <h2 id="about-heading">Engineer by logic,<br />designer by care.</h2>
+          </div>
+          <div>
+            <p>
+              I'm Shannmithra Anand, a computer science student with a passion for building systems that are both technically rigorous and accessible to every user. From file-handling in C to semantic HTML, I care about the craft at every layer.
+            </p>
+            <p style="margin-top:1rem;">
+              When I'm not writing code, I'm studying algorithms, contributing to open-source, and chasing a perfect Lighthouse audit.
+            </p>
+
+            <ul class="skills-list" aria-label="Technical skills">
+              <li>C / C++</li>
+              <li>HTML5</li>
+              <li>CSS3</li>
+              <li>JavaScript</li>
+              <li>Semantic HTML</li>
+              <li>WCAG 2.2</li>
+              <li>ARIA</li>
+              <li>Data Structures</li>
+              <li>Algorithms</li>
+              <li>File I/O</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects" class="section" aria-labelledby="projects-heading">
+      <div class="container">
+        <span class="eyebrow">Work</span>
+        <h2 id="projects-heading">Selected projects</h2>
+        <p>A few things I've built — each one prioritising correctness, performance, and accessibility.</p>
+
+        <div class="projects-grid" role="list">
+
+          <article class="card" role="listitem">
+            <div class="card-icon" aria-hidden="true">📁</div>
+            <h3>Student Records System</h3>
+            <p>A file-backed student management application in C supporting CRUD operations with structured records.</p>
+            <ul class="card-tags" aria-label="Technologies used">
+              <li>C</li><li>File I/O</li><li>Structs</li>
+            </ul>
+            <a class="card-link" href="student-records.html" target="_blank" aria-label="Open Student Records System live app">Open Live App</a>
+          </article>
+
+          <article class="card" role="listitem">
+            <div class="card-icon" aria-hidden="true">♿</div>
+            <h3>Accessible Portfolio</h3>
+            <p>This site — semantic HTML5, WCAG 2.2 AA compliant, keyboard navigable, scores 100 on Lighthouse.</p>
+            <ul class="card-tags" aria-label="Technologies used">
+              <li>HTML5</li><li>CSS3</li><li>ARIA</li>
+            </ul>
+            <a class="card-link" href="#" aria-label="View Accessible Portfolio source code">Source</a>
+          </article>
+
+          <article class="card" role="listitem">
+            <div class="card-icon" aria-hidden="true">🔢</div>
+            <h3>Numerical Methods Tool</h3>
+            <p>Interactive tool: Trapezoidal Rule, Simpson's Rule, Double Integration, Newton-Raphson, Bisection Method, and 2D Heat Distribution — with live graphs.</p>
+            <ul class="card-tags" aria-label="Technologies used">
+              <li>JavaScript</li><li>Canvas API</li><li>Trapezoidal</li><li>Newton-Raphson</li>
+            </ul>
+            <a class="card-link" href="numerical-methods.html" target="_blank" aria-label="Open Numerical Methods Tool live app">Open Live App</a>
+          </article>
+
+          <article class="card" role="listitem">
+            <div class="card-icon" aria-hidden="true">✅</div>
+            <h3>Real-time Task Manager</h3>
+            <p>Kanban-style board with drag-and-drop columns, priority levels, due-date tracking, live search/filter, and persistent localStorage — all in vanilla JS.</p>
+            <ul class="card-tags" aria-label="Technologies used">
+              <li>JavaScript</li><li>Drag & Drop API</li><li>localStorage</li><li>ARIA</li>
+            </ul>
+            <a class="card-link" href="task-manager.html" target="_blank" aria-label="Open Real-time Task Manager live app">Open Live App</a>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="section" aria-labelledby="contact-heading">
+      <div class="container">
+        <span class="eyebrow">Contact</span>
+
+        <div class="contact-wrap">
+          <div class="contact-info">
+            <h2 id="contact-heading">Let's build something together.</h2>
+            <p style="margin-top:0.75rem;">
+              Open to internships, freelance projects, and collaborations. Reach out and I'll reply within 48 hours.
+            </p>
+
+            <address style="margin-top:2rem;">
+              <p>
+                <strong>Email</strong><br />
+                <a href="mailto:shannmithraanand@gmail.com">shannmithraanand@gmail.com</a>
+              </p>
+              <p style="margin-top:1rem;">
+                <strong>Location</strong><br />
+                <span>Chennai, Tamil Nadu, India</span>
+              </p>
+            </address>
+          </div>
+
+          <!-- Accessible, tab-navigable contact form -->
+          <div>
+            <form
+              action="#"
+              method="post"
+              novalidate
+              aria-labelledby="contact-heading"
+            >
+              <p class="required-note">Fields marked <abbr title="required">*</abbr> are required.</p>
+
+              <div class="form-group">
+                <label for="name">Full name <abbr title="required" aria-hidden="true">*</abbr></label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  autocomplete="name"
+                  required
+                  aria-required="true"
+                  aria-describedby="name-desc"
+                  placeholder="Ada Lovelace"
+                />
+                <span id="name-desc" class="form-desc">Your full name as you'd like to be addressed.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email address <abbr title="required" aria-hidden="true">*</abbr></label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  autocomplete="email"
+                  required
+                  aria-required="true"
+                  aria-describedby="email-desc"
+                  placeholder="ada@example.com"
+                />
+                <span id="email-desc" class="form-desc">I'll only use this to reply to you.</span>
+              </div>
+
+              <div class="form-group">
+                <label for="subject">Subject <abbr title="required" aria-hidden="true">*</abbr></label>
+                <select id="subject" name="subject" required aria-required="true">
+                  <option value="" disabled selected>Select a topic…</option>
+                  <option value="job">Job opportunity</option>
+                  <option value="freelance">Freelance project</option>
+                  <option value="collaboration">Open-source collaboration</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="message">Message <abbr title="required" aria-hidden="true">*</abbr></label>
+                <textarea
+                  id="message"
+                  name="message"
+                  required
+                  aria-required="true"
+                  aria-describedby="message-desc"
+                  placeholder="Tell me about your project…"
+                ></textarea>
+                <span id="message-desc" class="form-desc">Minimum 20 characters.</span>
+              </div>
+
+              <button type="submit" class="btn-submit">Send message</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────── -->
+  <footer role="contentinfo">
+    <div class="container">
+      <p>© <time datetime="2026">2026</time> Shannmithra Anand. Built with semantic HTML5 &amp; care.</p>
+
+      <nav aria-label="Social links">
+        <ul class="social-links" role="list">
+          <li><a href="https://github.com" rel="noopener noreferrer" target="_blank" aria-label="GitHub (opens in new tab)">GitHub</a></li>
+          <li><a href="https://linkedin.com" rel="noopener noreferrer" target="_blank" aria-label="LinkedIn (opens in new tab)">LinkedIn</a></li>
+          <li><a href="mailto:shannmithraanand@gmail.com" aria-label="Email Shannmithra">Email</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // Highlight active nav link on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('nav[aria-label="Primary"] a');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            const isCurrent = link.getAttribute('href') === '#' + entry.target.id;
+            link.setAttribute('aria-current', isCurrent ? 'page' : 'false');
+          });
+        }
+      });
+    }, { threshold: 0.5 });
+
+    sections.forEach(s => observer.observe(s));
+
+    // Form submission feedback (accessible)
+    const form = document.querySelector('form');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('.btn-submit');
+      btn.textContent = 'Message sent ✓';
+      btn.disabled = true;
+      btn.setAttribute('aria-label', 'Message sent successfully');
+    });
+  </script>
+
+</body>
+</html>

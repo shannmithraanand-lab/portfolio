@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Numerical Methods Tool — Trapezoidal Rule, Simpson's Rule, Double Integration, Newton-Raphson and more by Shannmithra Anand." />
+  <title>Numerical Methods Tool — Shannmithra Anand</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:   #0d1b2a;
+      --navy2:  #132337;
+      --navy3:  #1a2f47;
+      --teal:   #2dd4bf;
+      --teal-d: #1a9e8e;
+      --warm:   #f5f0e8;
+      --muted:  #8fa3b1;
+      --green:  #4ade80;
+      --yellow: #fbbf24;
+      --red:    #f87171;
+      --purple: #a78bfa;
+      --r: 8px;
+      --focus: 0 0 0 3px rgba(45,212,191,0.5);
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--navy);
+      color: var(--warm);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    *:focus-visible { outline: none; box-shadow: var(--focus); border-radius: var(--r); }
+
+    /* ── Header ── */
+    header {
+      background: rgba(13,27,42,0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      padding: 0 1.5rem;
+      height: 3.6rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(10px);
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-size: 0.82rem; font-weight: 500;
+      color: var(--muted); text-decoration: none; transition: color 0.15s;
+    }
+    .back-link:hover { color: var(--teal); }
+    .header-title { font-family: 'Fraunces', serif; font-size: 1.05rem; color: #fff; }
+    .badge {
+      font-size: 0.7rem; font-weight: 600;
+      background: rgba(45,212,191,0.12);
+      border: 1px solid rgba(45,212,191,0.25);
+      color: var(--teal); padding: 0.25rem 0.75rem; border-radius: 999px;
+    }
+
+    /* ── Layout ── */
+    .app {
+      flex: 1; display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 0;
+    }
+    @media (max-width: 700px) { .app { grid-template-columns: 1fr; } }
+
+    /* ── Sidebar ── */
+    aside {
+      background: var(--navy2);
+      border-right: 1px solid rgba(255,255,255,0.07);
+      padding: 1.5rem 1rem;
+      display: flex; flex-direction: column; gap: 0.35rem;
+    }
+    .sidebar-label {
+      font-size: 0.68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--muted); padding: 0.5rem 0.5rem 0.25rem;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: var(--r);
+      cursor: pointer;
+      font-size: 0.875rem; font-weight: 500;
+      color: var(--muted);
+      border: none; background: none;
+      width: 100%; text-align: left;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--warm); }
+    .nav-item.active { background: rgba(45,212,191,0.12); color: var(--teal); }
+    .nav-item .icon { font-size: 1rem; width: 1.25rem; text-align: center; }
+    .nav-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 0.5rem 0; }
+
+    /* ── Main panel ── */
+    .panel { padding: 2rem 2rem 3rem; overflow-y: auto; }
+    .method-title {
+      font-family: 'Fraunces', serif; font-size: 1.75rem; color: #fff; margin-bottom: 0.3rem;
+    }
+    .method-desc { color: var(--muted); font-size: 0.9rem; max-width: 65ch; margin-bottom: 1.75rem; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--navy2);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--teal); margin-bottom: 1rem;
+    }
+
+    /* ── Form elements ── */
+    .form-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; flex: 1; min-width: 140px; }
+    label { font-size: 0.82rem; font-weight: 500; color: var(--warm); }
+    .hint { font-size: 0.75rem; color: var(--muted); }
+    input, select {
+      background: var(--navy3);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--warm);
+      border-radius: var(--r);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      padding: 0.6rem 0.9rem;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--teal); box-shadow: var(--focus); }
+    input[type="range"] {
+      padding: 0; height: 4px; accent-color: var(--teal); cursor: pointer; background: transparent;
+    }
+
+    .formula-box {
+      background: var(--navy3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--r);
+      padding: 1rem 1.25rem;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      color: var(--teal);
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1.4rem;
+      font-size: 0.875rem; font-weight: 600;
+      border-radius: 999px; border: none;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: background 0.15s, color 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--teal); color: var(--navy); }
+    .btn-primary:hover { background: var(--teal-d); color: #fff; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--warm);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+    /* ── Results ── */
+    .result-box {
+      background: var(--navy3);
+      border: 1px solid rgba(45,212,191,0.2);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1.25rem;
+      display: none;
+    }
+    .result-box.show { display: block; }
+    .result-main {
+      font-family: var(--mono);
+      font-size: 1.5rem;
+      color: var(--teal);
+      margin: 0.25rem 0 0.75rem;
+    }
+    .result-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .result-steps {
+      margin-top: 1rem;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.9;
+      max-height: 240px;
+      overflow-y: auto;
+      background: var(--navy2);
+      border-radius: var(--r);
+      padding: 0.75rem 1rem;
+    }
+    .result-steps .step-head { color: var(--yellow); }
+    .result-steps .step-val  { color: var(--warm); }
+    .result-steps .step-ok   { color: var(--green); }
+    .result-steps .step-err  { color: var(--red); }
+
+    /* ── Canvas ── */
+    canvas {
+      width: 100%; height: 220px;
+      border-radius: var(--r);
+      display: block;
+      background: var(--navy3);
+      cursor: crosshair;
+    }
+    .canvas-wrap { position: relative; margin-bottom: 1rem; }
+    .canvas-hint { font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem; }
+
+    /* ── Step table ── */
+    .step-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .step-table th, .step-table td { padding: 0.4rem 0.75rem; text-align: right; }
+    .step-table th { color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .step-table td { border-bottom: 1px solid rgba(255,255,255,0.04); font-family: var(--mono); }
+    .step-table td:first-child { text-align: left; color: var(--muted); }
+    .step-table tr:last-child td { color: var(--teal); font-weight: 600; }
+
+    /* ── Tag chips ── */
+    .tag { display: inline-block; background: rgba(255,255,255,0.06); border-radius: 4px; padding: 0.15rem 0.5rem; font-size: 0.75rem; color: var(--muted); margin-right: 0.3rem; }
+
+    /* ── Error ── */
+    .err-msg { color: var(--red); font-size: 0.82rem; margin-top: 0.5rem; display: none; }
+    .err-msg.show { display: block; }
+
+    /* ── Tooltip ── */
+    .tooltip-wrap { position: relative; display: inline-block; }
+    .tooltip-icon { cursor: help; color: var(--muted); font-size: 0.8rem; margin-left: 0.3rem; }
+    .tooltip-text {
+      display: none; position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%);
+      background: var(--navy3); border: 1px solid rgba(255,255,255,0.1);
+      padding: 0.4rem 0.75rem; border-radius: 6px;
+      font-size: 0.75rem; color: var(--warm); width: 200px; text-align: center;
+      z-index: 99; white-space: normal; line-height: 1.5;
+    }
+    .tooltip-wrap:hover .tooltip-text { display: block; }
+
+    footer {
+      text-align: center; padding: 1.25rem;
+      font-size: 0.78rem; color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+  </style>
+</head>
+<body>
+
+<header role="banner">
+  <a class="back-link" href="index.html" aria-label="Back to portfolio">← Portfolio</a>
+  <span class="header-title">Numerical Methods Tool</span>
+  <span class="badge">Interactive</span>
+</header>
+
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside role="navigation" aria-label="Method navigation">
+    <div class="sidebar-label">Integration</div>
+    <button class="nav-item active" data-method="trap" aria-current="true">
+      <span class="icon">∫</span> Trapezoidal Rule
+    </button>
+    <button class="nav-item" data-method="simp">
+      <span class="icon">∫</span> Simpson's Rule
+    </button>
+    <button class="nav-item" data-method="double">
+      <span class="icon">∬</span> Double Integration
+    </button>
+    <div class="nav-divider"></div>
+    <div class="sidebar-label">Root Finding</div>
+    <button class="nav-item" data-method="newton">
+      <span class="icon">⚙</span> Newton-Raphson
+    </button>
+    <button class="nav-item" data-method="bisect">
+      <span class="icon">⚙</span> Bisection Method
+    </button>
+    <div class="nav-divider"></div>
+    <div class="sidebar-label">Differentiation</div>
+    <button class="nav-item" data-method="diff">
+      <span class="icon">∂</span> Numerical Diff.
+    </button>
+    <div class="nav-divider"></div>
+    <div class="sidebar-label">Heat Distribution</div>
+    <button class="nav-item" data-method="heat">
+      <span class="icon">🌡</span> Heat 2D Trap.
+    </button>
+  </aside>
+
+  <!-- ── Panel ── -->
+  <main class="panel" id="main-panel" tabindex="-1" aria-live="polite">
+    <!-- Content injected by JS -->
+  </main>
+
+</div>
+
+<footer role="contentinfo">
+  Built by <strong>Shannmithra Anand</strong> · All calculations run in your browser · <a href="index.html">← Back to portfolio</a>
+</footer>
+
+<script>
+// ── Safe math evaluator ──────────────────────────────────────
+function safeEval(expr, x) {
+  try {
+    // Replace common math notation
+    let e = expr
+      .replace(/\^/g, '**')
+      .replace(/sin/g,  'Math.sin')
+      .replace(/cos/g,  'Math.cos')
+      .replace(/tan/g,  'Math.tan')
+      .replace(/exp/g,  'Math.exp')
+      .replace(/log/g,  'Math.log')
+      .replace(/sqrt/g, 'Math.sqrt')
+      .replace(/abs/g,  'Math.abs')
+      .replace(/pi/g,   'Math.PI')
+      .replace(/e(?![xp])/g, 'Math.E');
+    // eslint-disable-next-line no-new-func
+    const fn = new Function('x', `"use strict"; return (${e});`);
+    const v = fn(x);
+    if (!isFinite(v)) throw new Error('Not finite');
+    return v;
+  } catch { return NaN; }
+}
+
+function fmt(n, d=6) {
+  if (isNaN(n) || !isFinite(n)) return 'Error';
+  return parseFloat(n.toFixed(d)).toString();
+}
+
+// ── Canvas helper ────────────────────────────────────────────
+function drawFunction(canvas, expr, a, b, trapN, color='#2dd4bf') {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Sample points
+  const pts = [];
+  const steps = 300;
+  for (let i=0; i<=steps; i++) {
+    const xv = a + (b-a)*i/steps;
+    pts.push({ x: xv, y: safeEval(expr, xv) });
+  }
+  const validY = pts.map(p=>p.y).filter(isFinite);
+  if (!validY.length) return;
+  let yMin = Math.min(...validY), yMax = Math.max(...validY);
+  const yPad = (yMax-yMin)*0.15 || 1;
+  yMin -= yPad; yMax += yPad;
+
+  const toX = v => (v-a)/(b-a)*W;
+  const toY = v => H - (v-yMin)/(yMax-yMin)*H;
+
+  // Trap shading
+  if (trapN && trapN > 0) {
+    const h = (b-a)/trapN;
+    ctx.fillStyle = 'rgba(45,212,191,0.08)';
+    for (let i=0; i<trapN; i++) {
+      const x0=a+i*h, x1=a+(i+1)*h;
+      const y0=safeEval(expr,x0), y1=safeEval(expr,x1);
+      ctx.beginPath();
+      ctx.moveTo(toX(x0), toY(0));
+      ctx.lineTo(toX(x0), toY(y0));
+      ctx.lineTo(toX(x1), toY(y1));
+      ctx.lineTo(toX(x1), toY(0));
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(45,212,191,0.25)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  // X-axis
+  if (yMin < 0 && yMax > 0) {
+    const y0 = toY(0);
+    ctx.beginPath(); ctx.moveTo(0,y0); ctx.lineTo(W,y0);
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.stroke();
+  }
+
+  // Curve
+  ctx.beginPath();
+  let first = true;
+  for (const p of pts) {
+    if (!isFinite(p.y)) { first=true; continue; }
+    const px=toX(p.x), py=toY(p.y);
+    if (first) { ctx.moveTo(px,py); first=false; }
+    else ctx.lineTo(px,py);
+  }
+  ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = 'rgba(143,163,177,0.8)';
+  ctx.font = '11px Inter, sans-serif';
+  ctx.fillText(`x=${fmt(a,2)}`, 4, H-4);
+  ctx.fillText(`x=${fmt(b,2)}`, W-50, H-4);
+}
+
+// ── Methods ──────────────────────────────────────────────────
+
+const METHODS = {
+
+  trap: {
+    title: 'Trapezoidal Rule',
+    desc: 'Approximates a definite integral by dividing the area under a curve into trapezoids. More intervals = higher accuracy.',
+    tags: ['Integration', 'Numerical', 'Single Variable'],
+    render() {
+      return `
+      <div class="formula-box" aria-label="Trapezoidal Rule formula">
+        ∫ f(x) dx ≈ (h/2) × [f(x₀) + 2f(x₁) + 2f(x₂) + … + 2f(xₙ₋₁) + f(xₙ)]<br/>
+        where  h = (b − a) / n
+      </div>
+      <div class="card">
+        <div class="card-title">Function &amp; Limits</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2">
+            <label for="tr-fn">f(x) <span class="hint">— use sin, cos, exp, log, sqrt, x^2, pi</span></label>
+            <input type="text" id="tr-fn" value="x^2 + sin(x)" autocomplete="off" spellcheck="false" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label for="tr-a">Lower limit a</label><input type="number" id="tr-a" value="0" step="0.1" /></div>
+          <div class="form-group"><label for="tr-b">Upper limit b</label><input type="number" id="tr-b" value="3.14159" step="0.1" /></div>
+          <div class="form-group">
+            <label for="tr-n">Intervals n = <span id="tr-n-val">8</span></label>
+            <input type="range" id="tr-n" min="2" max="100" value="8" />
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="tr-canvas" width="800" height="220" role="img" aria-label="Graph of f(x) with trapezoidal approximation"></canvas>
+          <div class="canvas-hint">Shaded trapezoids show the approximation regions.</div>
+        </div>
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <button class="btn btn-primary" id="tr-calc">Calculate</button>
+          <button class="btn btn-ghost"   id="tr-preview">Update Graph</button>
+        </div>
+        <p class="err-msg" id="tr-err" role="alert"></p>
+      </div>
+      <div class="result-box" id="tr-result">
+        <div class="result-label">Approximate Integral Value</div>
+        <div class="result-main" id="tr-ans"></div>
+        <div style="color:var(--muted);font-size:0.82rem" id="tr-info"></div>
+        <div class="result-steps" id="tr-steps"></div>
+      </div>`;
+    },
+    bind() {
+      const fn = () => document.getElementById('tr-fn').value;
+      const a  = () => parseFloat(document.getElementById('tr-a').value);
+      const b  = () => parseFloat(document.getElementById('tr-b').value);
+      const n  = () => parseInt(document.getElementById('tr-n').value);
+      const cv = document.getElementById('tr-canvas');
+
+      document.getElementById('tr-n').addEventListener('input', e => {
+        document.getElementById('tr-n-val').textContent = e.target.value;
+        drawFunction(cv, fn(), a(), b(), n());
+      });
+      document.getElementById('tr-preview').addEventListener('click', () => {
+        drawFunction(cv, fn(), a(), b(), n());
+      });
+      drawFunction(cv, fn(), a(), b(), n());
+
+      document.getElementById('tr-calc').addEventListener('click', () => {
+        const fa=a(), fb=b(), fn2=fn(), ni=n();
+        const err = document.getElementById('tr-err');
+        err.classList.remove('show');
+        if (isNaN(fa)||isNaN(fb)) { err.textContent='Enter valid limits.'; err.classList.add('show'); return; }
+        if (fa>=fb) { err.textContent='a must be less than b.'; err.classList.add('show'); return; }
+        const h = (fb-fa)/ni;
+        let sum = safeEval(fn2,fa) + safeEval(fn2,fb);
+        const rows = [];
+        for (let i=1;i<ni;i++) {
+          const xi = fa + i*h;
+          const fi = safeEval(fn2,xi);
+          if (isNaN(fi)) { err.textContent=`f(${fmt(xi,3)}) is undefined. Check your function.`; err.classList.add('show'); return; }
+          sum += 2*fi;
+          rows.push({i, xi, fi, coeff:2});
+        }
+        const result = (h/2)*sum;
+        document.getElementById('tr-ans').textContent = fmt(result);
+        document.getElementById('tr-info').textContent = `h = ${fmt(h,5)}  ·  n = ${ni}  ·  interval [${fa}, ${fb}]`;
+
+        let stepsHTML = `<table class="step-table"><thead><tr><th>i</th><th>xᵢ</th><th>f(xᵢ)</th><th>Coeff.</th><th>Contribution</th></tr></thead><tbody>`;
+        stepsHTML += `<tr><td>0</td><td>${fmt(fa,4)}</td><td>${fmt(safeEval(fn2,fa),5)}</td><td>1</td><td>${fmt(safeEval(fn2,fa),5)}</td></tr>`;
+        rows.forEach(r => {
+          stepsHTML += `<tr><td>${r.i}</td><td>${fmt(r.xi,4)}</td><td>${fmt(r.fi,5)}</td><td>2</td><td>${fmt(2*r.fi,5)}</td></tr>`;
+        });
+        stepsHTML += `<tr><td>${ni}</td><td>${fmt(fb,4)}</td><td>${fmt(safeEval(fn2,fb),5)}</td><td>1</td><td>${fmt(safeEval(fn2,fb),5)}</td></tr>`;
+        stepsHTML += `<tr><td colspan="4" style="color:var(--teal);text-align:right">Result = (h/2)×sum =</td><td>${fmt(result)}</td></tr>`;
+        stepsHTML += '</tbody></table>';
+        document.getElementById('tr-steps').innerHTML = stepsHTML;
+        document.getElementById('tr-result').classList.add('show');
+        drawFunction(cv, fn2, fa, fb, ni);
+      });
+    }
+  },
+
+  simp: {
+    title: "Simpson's Rule",
+    desc: "Uses parabolic arcs instead of straight lines to approximate the integral. Requires even n. Generally more accurate than the Trapezoidal Rule for smooth functions.",
+    tags: ['Integration', 'Parabolic', 'Single Variable'],
+    render() {
+      return `
+      <div class="formula-box" aria-label="Simpson's Rule formula">
+        ∫ f(x) dx ≈ (h/3) × [f(x₀) + 4f(x₁) + 2f(x₂) + 4f(x₃) + … + 4f(xₙ₋₁) + f(xₙ)]<br/>
+        where  h = (b − a) / n   and  n  must be even
+      </div>
+      <div class="card">
+        <div class="card-title">Function &amp; Limits</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2">
+            <label for="si-fn">f(x)</label>
+            <input type="text" id="si-fn" value="sin(x)" autocomplete="off" spellcheck="false" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label for="si-a">Lower limit a</label><input type="number" id="si-a" value="0" step="0.1" /></div>
+          <div class="form-group"><label for="si-b">Upper limit b</label><input type="number" id="si-b" value="3.14159" step="0.1" /></div>
+          <div class="form-group">
+            <label for="si-n">Intervals n = <span id="si-n-val">8</span> <span class="hint">(even)</span></label>
+            <input type="range" id="si-n" min="2" max="100" step="2" value="8" />
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="si-canvas" width="800" height="220" role="img" aria-label="Graph of f(x)"></canvas>
+        </div>
+        <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+          <button class="btn btn-primary" id="si-calc">Calculate</button>
+          <button class="btn btn-ghost"   id="si-preview">Update Graph</button>
+        </div>
+        <p class="err-msg" id="si-err" role="alert"></p>
+      </div>
+      <div class="result-box" id="si-result">
+        <div class="result-label">Approximate Integral (Simpson's)</div>
+        <div class="result-main" id="si-ans"></div>
+        <div style="color:var(--muted);font-size:0.82rem" id="si-info"></div>
+        <div class="result-steps" id="si-steps"></div>
+      </div>`;
+    },
+    bind() {
+      const fn = () => document.getElementById('si-fn').value;
+      const a  = () => parseFloat(document.getElementById('si-a').value);
+      const b  = () => parseFloat(document.getElementById('si-b').value);
+      const n  = () => parseInt(document.getElementById('si-n').value);
+      const cv = document.getElementById('si-canvas');
+      document.getElementById('si-n').addEventListener('input', e => {
+        document.getElementById('si-n-val').textContent = e.target.value;
+        drawFunction(cv, fn(), a(), b(), n(), '#a78bfa');
+      });
+      document.getElementById('si-preview').addEventListener('click', () => drawFunction(cv, fn(), a(), b(), n(), '#a78bfa'));
+      drawFunction(cv, fn(), a(), b(), n(), '#a78bfa');
+
+      document.getElementById('si-calc').addEventListener('click', () => {
+        const fa=a(), fb=b(), fn2=fn(), ni=n();
+        const err=document.getElementById('si-err');
+        err.classList.remove('show');
+        if (fa>=fb) { err.textContent='a must be less than b.'; err.classList.add('show'); return; }
+        const h=(fb-fa)/ni;
+        let sum=safeEval(fn2,fa)+safeEval(fn2,fb);
+        let rows=[];
+        for(let i=1;i<ni;i++){
+          const xi=fa+i*h, fi=safeEval(fn2,xi);
+          const c=(i%2===0)?2:4;
+          sum+=c*fi;
+          rows.push({i,xi,fi,c});
+        }
+        const result=(h/3)*sum;
+        document.getElementById('si-ans').textContent=fmt(result);
+        document.getElementById('si-info').textContent=`h = ${fmt(h,5)}  ·  n = ${ni}`;
+        let html=`<table class="step-table"><thead><tr><th>i</th><th>xᵢ</th><th>f(xᵢ)</th><th>Coeff.</th></tr></thead><tbody>`;
+        html+=`<tr><td>0</td><td>${fmt(fa,4)}</td><td>${fmt(safeEval(fn2,fa),5)}</td><td>1</td></tr>`;
+        rows.forEach(r=>{ html+=`<tr><td>${r.i}</td><td>${fmt(r.xi,4)}</td><td>${fmt(r.fi,5)}</td><td>${r.c}</td></tr>`; });
+        html+=`<tr><td>${ni}</td><td>${fmt(fb,4)}</td><td>${fmt(safeEval(fn2,fb),5)}</td><td>1</td></tr>`;
+        html+=`<tr><td colspan="3" style="color:var(--purple);text-align:right">Result =</td><td>${fmt(result)}</td></tr>`;
+        html+='</tbody></table>';
+        document.getElementById('si-steps').innerHTML=html;
+        document.getElementById('si-result').classList.add('show');
+        drawFunction(cv,fn2,fa,fb,ni,'#a78bfa');
+      });
+    }
+  },
+
+  double: {
+    title: 'Double Integration',
+    desc: 'Computes ∬ f(x,y) dydx over a rectangular region using the 2D Trapezoidal Rule — exactly what was used to model heat distribution.',
+    tags: ['Double Integral', 'Heat Distribution', '2D Trapezoidal'],
+    render() {
+      return `
+      <div class="formula-box" aria-label="Double integration formula">
+        ∬ f(x,y) dydx  ≈  Σᵢ Σⱼ  wᵢ × wⱼ × (hₓ/2) × (hᵧ/2) × f(xᵢ, yⱼ)<br/>
+        Applied over: x ∈ [a,b],  y ∈ [c,d]<br/>
+        Weights: w = 1 at corners, 2 on edges, 4 at interior nodes
+      </div>
+      <div class="card">
+        <div class="card-title">f(x, y) — use x and y variables</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:3">
+            <label for="db-fn">f(x, y)</label>
+            <input type="text" id="db-fn" value="sin(x)*cos(y)" autocomplete="off" spellcheck="false" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label for="db-a">x lower (a)</label><input type="number" id="db-a" value="0" step="0.1" /></div>
+          <div class="form-group"><label for="db-b">x upper (b)</label><input type="number" id="db-b" value="3.14159" step="0.1" /></div>
+          <div class="form-group"><label for="db-c">y lower (c)</label><input type="number" id="db-c" value="0" step="0.1" /></div>
+          <div class="form-group"><label for="db-d">y upper (d)</label><input type="number" id="db-d" value="1.5708" step="0.1" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="db-nx">x intervals nₓ = <span id="db-nx-val">6</span></label>
+            <input type="range" id="db-nx" min="2" max="40" value="6" />
+          </div>
+          <div class="form-group">
+            <label for="db-ny">y intervals nᵧ = <span id="db-ny-val">6</span></label>
+            <input type="range" id="db-ny" min="2" max="40" value="6" />
+          </div>
+        </div>
+        <button class="btn btn-primary" id="db-calc">Calculate Double Integral</button>
+        <p class="err-msg" id="db-err" role="alert"></p>
+      </div>
+      <div class="result-box" id="db-result">
+        <div class="result-label">∬ f(x,y) dydx ≈</div>
+        <div class="result-main" id="db-ans"></div>
+        <div style="color:var(--muted);font-size:0.82rem;margin-top:0.25rem" id="db-info"></div>
+        <canvas id="db-canvas" width="500" height="200" style="margin-top:1rem;border-radius:8px" role="img" aria-label="Heat map of f(x,y)"></canvas>
+        <div class="canvas-hint">Colour map of f(x,y) over the integration region.</div>
+        <div class="result-steps" id="db-steps" style="margin-top:0.75rem"></div>
+      </div>`;
+    },
+    bind() {
+      document.getElementById('db-nx').addEventListener('input', e => document.getElementById('db-nx-val').textContent=e.target.value);
+      document.getElementById('db-ny').addEventListener('input', e => document.getElementById('db-ny-val').textContent=e.target.value);
+
+      document.getElementById('db-calc').addEventListener('click', () => {
+        const fn2=document.getElementById('db-fn').value;
+        const fa=parseFloat(document.getElementById('db-a').value);
+        const fb=parseFloat(document.getElementById('db-b').value);
+        const fc=parseFloat(document.getElementById('db-c').value);
+        const fd=parseFloat(document.getElementById('db-d').value);
+        const nx=parseInt(document.getElementById('db-nx').value);
+        const ny=parseInt(document.getElementById('db-ny').value);
+        const err=document.getElementById('db-err');
+        err.classList.remove('show');
+
+        if(fa>=fb||fc>=fd){err.textContent='Check your limits (a<b, c<d).';err.classList.add('show');return;}
+
+        const hx=(fb-fa)/nx, hy=(fd-fc)/ny;
+
+        // Evaluate on grid
+        const vals=[];
+        for(let i=0;i<=nx;i++){
+          vals[i]=[];
+          for(let j=0;j<=ny;j++){
+            const x=fa+i*hx, y=fc+j*hy;
+            // Evaluate f(x,y) by replacing x and y
+            try {
+              let e=fn2
+                .replace(/\^/g,'**')
+                .replace(/sin/g,'Math.sin').replace(/cos/g,'Math.cos')
+                .replace(/tan/g,'Math.tan').replace(/exp/g,'Math.exp')
+                .replace(/log/g,'Math.log').replace(/sqrt/g,'Math.sqrt')
+                .replace(/pi/g,'Math.PI').replace(/\be\b/g,'Math.E');
+              // eslint-disable-next-line no-new-func
+              const fn3=new Function('x','y',`"use strict"; return (${e});`);
+              vals[i][j]=fn3(x,y);
+            } catch { vals[i][j]=NaN; }
+          }
+        }
+
+        let total=0;
+        for(let i=0;i<=nx;i++){
+          for(let j=0;j<=ny;j++){
+            const wx=(i===0||i===nx)?1:2;
+            const wy=(j===0||j===ny)?1:2;
+            total+=wx*wy*vals[i][j];
+          }
+        }
+        const result=(hx*hy/4)*total;
+
+        document.getElementById('db-ans').textContent=fmt(result);
+        document.getElementById('db-info').textContent=`hₓ=${fmt(hx,4)}, hᵧ=${fmt(hy,4)}  ·  Grid: ${nx+1}×${ny+1} = ${(nx+1)*(ny+1)} nodes`;
+        document.getElementById('db-result').classList.add('show');
+
+        // Draw heat map
+        const cv=document.getElementById('db-canvas');
+        const ctx=cv.getContext('2d');
+        const W=cv.width,H=cv.height;
+        const flat=vals.flat().filter(isFinite);
+        const vMin=Math.min(...flat), vMax=Math.max(...flat);
+        ctx.clearRect(0,0,W,H);
+        const cellW=W/(nx+1), cellH=H/(ny+1);
+        for(let i=0;i<=nx;i++){
+          for(let j=0;j<=ny;j++){
+            const v=vals[i][j];
+            const t=(v-vMin)/(vMax-vMin||1);
+            // Navy→Teal→Yellow colour ramp
+            let r,g,b;
+            if(t<0.5){r=Math.round(13+t*2*(45-13));g=Math.round(27+t*2*(212-27));b=Math.round(42+t*2*(191-42));}
+            else{const t2=(t-0.5)*2;r=Math.round(45+t2*(251-45));g=Math.round(212+t2*(191-212));b=Math.round(191+t2*(36-191));}
+            ctx.fillStyle=`rgb(${r},${g},${b})`;
+            ctx.fillRect(i*cellW, (ny-j)*cellH, cellW+1, cellH+1);
+          }
+        }
+
+        let html='<div style="color:var(--yellow);font-size:0.78rem;margin-bottom:0.5rem">Corner / edge samples (i,j → f(x,y))</div>';
+        html+=`<table class="step-table"><thead><tr><th>i</th><th>j</th><th>x</th><th>y</th><th>f(x,y)</th><th>wₓ·wᵧ</th></tr></thead><tbody>`;
+        [[0,0],[0,ny],[nx,0],[nx,ny],[Math.floor(nx/2),Math.floor(ny/2)]].forEach(([i,j])=>{
+          const x=fa+i*hx,y=fc+j*hy;
+          const wx=(i===0||i===nx)?1:2, wy=(j===0||j===ny)?1:2;
+          html+=`<tr><td>${i}</td><td>${j}</td><td>${fmt(x,3)}</td><td>${fmt(y,3)}</td><td>${fmt(vals[i][j],5)}</td><td>${wx*wy}</td></tr>`;
+        });
+        html+=`<tr><td colspan="5" style="text-align:right;color:var(--teal)">∬ f dydx ≈</td><td>${fmt(result)}</td></tr>`;
+        html+='</tbody></table>';
+        document.getElementById('db-steps').innerHTML=html;
+      });
+    }
+  },
+
+  newton: {
+    title: 'Newton-Raphson Method',
+    desc: 'Iteratively finds roots of f(x) = 0 using the formula xₙ₊₁ = xₙ − f(xₙ)/f\'(xₙ). Numerically differentiates f for you.',
+    tags: ['Root Finding', 'Iterative', 'Quadratic Convergence'],
+    render() {
+      return `
+      <div class="formula-box">
+        xₙ₊₁ = xₙ − f(xₙ) / f′(xₙ)<br/>
+        f′(xₙ) ≈ [f(xₙ + h) − f(xₙ − h)] / 2h    (numerical derivative)
+      </div>
+      <div class="card">
+        <div class="card-title">Settings</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2">
+            <label for="nr-fn">f(x)</label>
+            <input type="text" id="nr-fn" value="x^3 - 2*x - 5" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="form-group"><label for="nr-x0">Initial guess x₀</label><input type="number" id="nr-x0" value="2" step="0.1" /></div>
+          <div class="form-group"><label for="nr-tol">Tolerance</label>
+            <select id="nr-tol">
+              <option value="1e-4">10⁻⁴</option>
+              <option value="1e-6" selected>10⁻⁶</option>
+              <option value="1e-8">10⁻⁸</option>
+            </select>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="nr-canvas" width="800" height="200" role="img" aria-label="Graph of f(x) showing root"></canvas>
+        </div>
+        <button class="btn btn-primary" id="nr-calc">Find Root</button>
+        <p class="err-msg" id="nr-err" role="alert"></p>
+      </div>
+      <div class="result-box" id="nr-result">
+        <div class="result-label">Root found at x ≈</div>
+        <div class="result-main" id="nr-ans"></div>
+        <div style="color:var(--muted);font-size:0.82rem" id="nr-info"></div>
+        <div class="result-steps" id="nr-steps"></div>
+      </div>`;
+    },
+    bind() {
+      const cv=document.getElementById('nr-canvas');
+      document.getElementById('nr-fn').addEventListener('input', () => {
+        const f=document.getElementById('nr-fn').value;
+        drawFunction(cv, f, -5, 5, 0, '#4ade80');
+      });
+      drawFunction(cv,'x^3 - 2*x - 5',-5,5,0,'#4ade80');
+
+      document.getElementById('nr-calc').addEventListener('click', () => {
+        const fn2=document.getElementById('nr-fn').value;
+        let x=parseFloat(document.getElementById('nr-x0').value);
+        const tol=parseFloat(document.getElementById('nr-tol').value);
+        const err=document.getElementById('nr-err');
+        err.classList.remove('show');
+        const h=1e-7;
+        let rows=[], converged=false;
+        for(let i=0;i<50;i++){
+          const fx=safeEval(fn2,x);
+          const fpx=(safeEval(fn2,x+h)-safeEval(fn2,x-h))/(2*h);
+          if(Math.abs(fpx)<1e-12){err.textContent="Derivative ≈ 0. Try a different x₀.";err.classList.add('show');return;}
+          const xnew=x-fx/fpx;
+          rows.push({i:i+1,x,fx,fpx,xnew,ea:Math.abs(xnew-x)});
+          x=xnew;
+          if(Math.abs(fx)<tol&&i>0){converged=true;break;}
+        }
+        const root=rows[rows.length-1].xnew;
+        document.getElementById('nr-ans').textContent=fmt(root,8);
+        document.getElementById('nr-info').textContent=`${rows.length} iterations  ·  f(root) = ${fmt(safeEval(fn2,root),2e-10)}  ·  ${converged?'✓ Converged':'⚠ Max iters reached'}`;
+
+        let html=`<table class="step-table"><thead><tr><th>Iter</th><th>xₙ</th><th>f(xₙ)</th><th>f′(xₙ)</th><th>xₙ₊₁</th><th>|error|</th></tr></thead><tbody>`;
+        rows.forEach(r=>{
+          html+=`<tr><td>${r.i}</td><td>${fmt(r.x,6)}</td><td>${fmt(r.fx,6)}</td><td>${fmt(r.fpx,6)}</td><td>${fmt(r.xnew,6)}</td><td>${r.ea.toExponential(2)}</td></tr>`;
+        });
+        html+='</tbody></table>';
+        document.getElementById('nr-steps').innerHTML=html;
+        document.getElementById('nr-result').classList.add('show');
+
+        // Highlight root on canvas
+        const fnDraw=document.getElementById('nr-fn').value;
+        const span=Math.max(3,Math.abs(root)*2);
+        drawFunction(cv,fnDraw,root-span,root+span,0,'#4ade80');
+        // Draw vertical line at root
+        const ctx=cv.getContext('2d');
+        const W=cv.width;
+        const xPx=((root-(root-span))/(2*span))*W;
+        ctx.beginPath(); ctx.moveTo(xPx,0); ctx.lineTo(xPx,cv.height);
+        ctx.strokeStyle='rgba(248,113,113,0.7)'; ctx.lineWidth=2; ctx.setLineDash([4,3]);
+        ctx.stroke(); ctx.setLineDash([]);
+      });
+    }
+  },
+
+  bisect: {
+    title: 'Bisection Method',
+    desc: 'Guaranteed root-finding method that repeatedly halves the interval [a,b] where f changes sign. Slower but always converges.',
+    tags: ['Root Finding', 'Bracketing', 'Guaranteed Convergence'],
+    render() {
+      return `
+      <div class="formula-box">
+        If f(a)·f(b) &lt; 0 then root exists in [a, b]<br/>
+        c = (a + b) / 2<br/>
+        Replace a or b with c depending on sign of f(c)
+      </div>
+      <div class="card">
+        <div class="card-title">Settings</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2"><label for="bi-fn">f(x)</label><input type="text" id="bi-fn" value="x^3 - x - 2" autocomplete="off" spellcheck="false" /></div>
+          <div class="form-group"><label for="bi-a">a</label><input type="number" id="bi-a" value="1" step="0.1" /></div>
+          <div class="form-group"><label for="bi-b">b</label><input type="number" id="bi-b" value="2" step="0.1" /></div>
+          <div class="form-group"><label for="bi-tol">Tolerance</label>
+            <select id="bi-tol"><option value="1e-4">10⁻⁴</option><option value="1e-6" selected>10⁻⁶</option></select>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="bi-canvas" width="800" height="200" role="img" aria-label="Graph for bisection"></canvas>
+        </div>
+        <button class="btn btn-primary" id="bi-calc">Find Root</button>
+        <p class="err-msg" id="bi-err" role="alert"></p>
+      </div>
+      <div class="result-box" id="bi-result">
+        <div class="result-label">Root ≈</div>
+        <div class="result-main" id="bi-ans"></div>
+        <div style="color:var(--muted);font-size:0.82rem" id="bi-info"></div>
+        <div class="result-steps" id="bi-steps"></div>
+      </div>`;
+    },
+    bind() {
+      const cv=document.getElementById('bi-canvas');
+      drawFunction(cv,'x^3 - x - 2',0,3,0,'#fbbf24');
+      document.getElementById('bi-calc').addEventListener('click', () => {
+        const fn2=document.getElementById('bi-fn').value;
+        let a=parseFloat(document.getElementById('bi-a').value);
+        let b=parseFloat(document.getElementById('bi-b').value);
+        const tol=parseFloat(document.getElementById('bi-tol').value);
+        const err=document.getElementById('bi-err');
+        err.classList.remove('show');
+        if(safeEval(fn2,a)*safeEval(fn2,b)>0){err.textContent='f(a) and f(b) must have opposite signs.';err.classList.add('show');return;}
+        let rows=[],c;
+        for(let i=0;i<60;i++){
+          c=(a+b)/2;
+          const fc=safeEval(fn2,c);
+          rows.push({i:i+1,a,b,c,fc,len:b-a});
+          if(Math.abs(b-a)<tol||Math.abs(fc)<tol) break;
+          if(safeEval(fn2,a)*fc<0) b=c; else a=c;
+        }
+        document.getElementById('bi-ans').textContent=fmt(c,8);
+        document.getElementById('bi-info').textContent=`${rows.length} iterations  ·  f(root) ≈ ${fmt(safeEval(fn2,c),3)}`;
+        let html=`<table class="step-table"><thead><tr><th>Iter</th><th>a</th><th>b</th><th>c = midpoint</th><th>f(c)</th><th>Interval</th></tr></thead><tbody>`;
+        rows.forEach(r=>{html+=`<tr><td>${r.i}</td><td>${fmt(r.a,5)}</td><td>${fmt(r.b,5)}</td><td>${fmt(r.c,6)}</td><td>${fmt(r.fc,5)}</td><td>${r.len.toExponential(2)}</td></tr>`;});
+        html+='</tbody></table>';
+        document.getElementById('bi-steps').innerHTML=html;
+        document.getElementById('bi-result').classList.add('show');
+        drawFunction(cv,fn2,parseFloat(document.getElementById('bi-a').value),parseFloat(document.getElementById('bi-b').value),0,'#fbbf24');
+      });
+    }
+  },
+
+  diff: {
+    title: 'Numerical Differentiation',
+    desc: 'Estimates f\'(x) and f\'\'(x) at a point using forward, backward, and central difference formulas.',
+    tags: ['Differentiation', 'Finite Difference'],
+    render() {
+      return `
+      <div class="formula-box">
+        Forward:  f′(x) ≈ [f(x+h) − f(x)] / h<br/>
+        Backward: f′(x) ≈ [f(x) − f(x−h)] / h<br/>
+        Central:  f′(x) ≈ [f(x+h) − f(x−h)] / 2h  ← most accurate<br/>
+        f″(x) ≈ [f(x+h) − 2f(x) + f(x−h)] / h²
+      </div>
+      <div class="card">
+        <div class="card-title">Settings</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:2"><label for="df-fn">f(x)</label><input type="text" id="df-fn" value="x^3 + 2*x" autocomplete="off" spellcheck="false" /></div>
+          <div class="form-group"><label for="df-x">Point x₀</label><input type="number" id="df-x" value="2" step="0.1" /></div>
+          <div class="form-group"><label for="df-h">Step h</label>
+            <select id="df-h"><option value="0.1">0.1</option><option value="0.01" selected>0.01</option><option value="0.001">0.001</option><option value="0.0001">0.0001</option></select>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="df-canvas" width="800" height="200" role="img" aria-label="Function graph with tangent"></canvas>
+        </div>
+        <button class="btn btn-primary" id="df-calc">Differentiate</button>
+        <p class="err-msg" id="df-err" role="alert"></p>
+      </div>
+      <div class="result-box" id="df-result">
+        <div class="result-label">Derivatives at x₀</div>
+        <div class="result-main" id="df-ans"></div>
+        <div class="result-steps" id="df-steps"></div>
+      </div>`;
+    },
+    bind() {
+      const cv=document.getElementById('df-canvas');
+      drawFunction(cv,'x^3 + 2*x',-3,5,0,'#a78bfa');
+      document.getElementById('df-calc').addEventListener('click', () => {
+        const fn2=document.getElementById('df-fn').value;
+        const x0=parseFloat(document.getElementById('df-x').value);
+        const h=parseFloat(document.getElementById('df-h').value);
+        const fx=safeEval(fn2,x0), fxph=safeEval(fn2,x0+h), fxmh=safeEval(fn2,x0-h);
+        const fwd=(fxph-fx)/h;
+        const bwd=(fx-fxmh)/h;
+        const cen=(fxph-fxmh)/(2*h);
+        const d2=(fxph-2*fx+fxmh)/(h*h);
+        document.getElementById('df-ans').textContent=`f′(${x0}) ≈ ${fmt(cen,6)}`;
+        const html=`<table class="step-table"><thead><tr><th>Method</th><th>f′(x₀)</th></tr></thead><tbody>
+          <tr><td>Forward difference</td><td>${fmt(fwd,8)}</td></tr>
+          <tr><td>Backward difference</td><td>${fmt(bwd,8)}</td></tr>
+          <tr><td>Central difference ★</td><td>${fmt(cen,8)}</td></tr>
+          <tr><td>f″(x₀) central</td><td>${fmt(d2,8)}</td></tr>
+        </tbody></table>`;
+        document.getElementById('df-steps').innerHTML=html;
+        document.getElementById('df-result').classList.add('show');
+        const span=4;
+        drawFunction(cv,fn2,x0-span,x0+span,0,'#a78bfa');
+        // Draw tangent line
+        const ctx=cv.getContext('2d');
+        const W=cv.width,H=cv.height;
+        const pts=[];for(let i=0;i<=100;i++){const xv=x0-span+(2*span)*i/100;pts.push({x:xv,y:safeEval(fn2,xv)});}
+        const ys=pts.map(p=>p.y).filter(isFinite);
+        const yMin2=Math.min(...ys)-1,yMax2=Math.max(...ys)+1;
+        const tX=v=>(v-(x0-span))/(2*span)*W;
+        const tY=v=>H-(v-yMin2)/(yMax2-yMin2)*H;
+        const tx1=x0-span,ty1=fx+cen*(tx1-x0);
+        const tx2=x0+span,ty2=fx+cen*(tx2-x0);
+        ctx.beginPath();ctx.moveTo(tX(tx1),tY(ty1));ctx.lineTo(tX(tx2),tY(ty2));
+        ctx.strokeStyle='rgba(251,191,36,0.8)';ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.stroke();ctx.setLineDash([]);
+        // dot at x0
+        ctx.beginPath();ctx.arc(tX(x0),tY(fx),5,0,Math.PI*2);
+        ctx.fillStyle=var_get('--yellow');ctx.fill();
+      });
+    }
+  },
+
+  heat: {
+    title: 'Heat Distribution (2D Trapezoidal)',
+    desc: 'Models steady-state heat distribution over a 2D plate using double integration with the Trapezoidal Rule. T(x,y) represents temperature at point (x,y).',
+    tags: ['Heat Equation', 'Double Integral', 'Engineering'],
+    render() {
+      return `
+      <div class="formula-box">
+        Q = ∬ T(x,y) dydx   over plate [0,L] × [0,W]<br/>
+        T(x,y) = T_max · sin(πx/L) · sin(πy/W)   (default — sinusoidal boundary)<br/>
+        Or enter your own T(x,y) below.
+      </div>
+      <div class="card">
+        <div class="card-title">Plate Configuration</div>
+        <div class="form-row">
+          <div class="form-group"><label for="ht-tmax">T_max (°C)</label><input type="number" id="ht-tmax" value="100" /></div>
+          <div class="form-group"><label for="ht-L">Plate length L (m)</label><input type="number" id="ht-L" value="1" step="0.1" /></div>
+          <div class="form-group"><label for="ht-W">Plate width W (m)</label><input type="number" id="ht-W" value="1" step="0.1" /></div>
+          <div class="form-group"><label for="ht-n">Grid n</label>
+            <select id="ht-n"><option value="10">10×10</option><option value="20" selected>20×20</option><option value="40">40×40</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:3">
+            <label for="ht-fn">Custom T(x,y) <span class="hint">— leave blank for sinusoidal default</span></label>
+            <input type="text" id="ht-fn" placeholder="e.g. 100*exp(-x)*cos(y)" autocomplete="off" spellcheck="false" />
+          </div>
+        </div>
+        <button class="btn btn-primary" id="ht-calc">Compute Heat Distribution</button>
+        <p class="err-msg" id="ht-err" role="alert"></p>
+      </div>
+      <div class="result-box" id="ht-result">
+        <div class="result-label">Total Heat (∬ T dydx)</div>
+        <div class="result-main" id="ht-ans"></div>
+        <div style="color:var(--muted);font-size:0.82rem;margin-top:0.2rem" id="ht-info"></div>
+        <canvas id="ht-canvas" width="500" height="300" style="margin-top:1rem;border-radius:8px" role="img" aria-label="Heat distribution colour map of the 2D plate"></canvas>
+        <div class="canvas-hint">Heat map: dark navy = cold, teal = warm, yellow = hottest.</div>
+        <div class="result-steps" id="ht-steps" style="margin-top:0.75rem"></div>
+      </div>`;
+    },
+    bind() {
+      document.getElementById('ht-calc').addEventListener('click', () => {
+        const Tmax=parseFloat(document.getElementById('ht-tmax').value)||100;
+        const L=parseFloat(document.getElementById('ht-L').value)||1;
+        const W=parseFloat(document.getElementById('ht-W').value)||1;
+        const n=parseInt(document.getElementById('ht-n').value)||20;
+        const customFn=document.getElementById('ht-fn').value.trim();
+        const err=document.getElementById('ht-err');
+        err.classList.remove('show');
+
+        const hx=L/n, hy=W/n;
+        const vals=[];
+        for(let i=0;i<=n;i++){
+          vals[i]=[];
+          for(let j=0;j<=n;j++){
+            const x=i*hx, y=j*hy;
+            let t;
+            if(customFn){
+              try{
+                let e=customFn.replace(/\^/g,'**')
+                  .replace(/sin/g,'Math.sin').replace(/cos/g,'Math.cos')
+                  .replace(/exp/g,'Math.exp').replace(/log/g,'Math.log')
+                  .replace(/sqrt/g,'Math.sqrt').replace(/pi/g,'Math.PI');
+                // eslint-disable-next-line no-new-func
+                const fn3=new Function('x','y',`"use strict";return(${e});`);
+                t=fn3(x,y);
+              }catch{t=NaN;}
+            } else {
+              t=Tmax*Math.sin(Math.PI*x/L)*Math.sin(Math.PI*y/W);
+            }
+            vals[i][j]=isFinite(t)?t:0;
+          }
+        }
+
+        let total=0;
+        for(let i=0;i<=n;i++)for(let j=0;j<=n;j++){
+          const wx=(i===0||i===n)?1:2;
+          const wy=(j===0||j===n)?1:2;
+          total+=wx*wy*vals[i][j];
+        }
+        const result=(hx*hy/4)*total;
+
+        document.getElementById('ht-ans').textContent=fmt(result,4)+' °C·m²';
+        document.getElementById('ht-info').textContent=`Grid: ${n+1}×${n+1}  ·  hₓ=${hx.toFixed(4)}, hᵧ=${hy.toFixed(4)}  ·  Plate: ${L}m × ${W}m`;
+        document.getElementById('ht-result').classList.add('show');
+
+        // Draw heat map
+        const cv=document.getElementById('ht-canvas');
+        const ctx=cv.getContext('2d');
+        const CW=cv.width,CH=cv.height;
+        const flat=vals.flat();
+        const vMin=Math.min(...flat),vMax=Math.max(...flat);
+        const cw=CW/(n+1),ch=CH/(n+1);
+        for(let i=0;i<=n;i++){
+          for(let j=0;j<=n;j++){
+            const t=(vals[i][j]-vMin)/(vMax-vMin||1);
+            let r,g,b;
+            if(t<0.33){const s=t/0.33;r=Math.round(13+s*(45-13));g=Math.round(27+s*(212-27));b=Math.round(42+s*(191-42));}
+            else if(t<0.66){const s=(t-0.33)/0.33;r=Math.round(45+s*(74-45));g=Math.round(212+s*(222-212));b=Math.round(191+s*(128-191));}
+            else{const s=(t-0.66)/0.34;r=Math.round(74+s*(251-74));g=Math.round(222+s*(191-222));b=Math.round(128+s*(36-128));}
+            ctx.fillStyle=`rgb(${r},${g},${b})`;
+            ctx.fillRect(i*cw,(n-j)*ch,cw+1,ch+1);
+          }
+        }
+
+        // Stats table
+        const avg=result/(L*W);
+        const peak=Math.max(...flat);
+        let html=`<table class="step-table"><thead><tr><th>Metric</th><th>Value</th></tr></thead><tbody>
+          <tr><td>Total heat Q</td><td>${fmt(result,4)} °C·m²</td></tr>
+          <tr><td>Average temperature</td><td>${fmt(avg,4)} °C</td></tr>
+          <tr><td>Peak T(x,y)</td><td>${fmt(peak,4)} °C</td></tr>
+          <tr><td>Plate area</td><td>${L*W} m²</td></tr>
+          <tr><td>Grid nodes</td><td>${(n+1)*(n+1)}</td></tr>
+        </tbody></table>`;
+        document.getElementById('ht-steps').innerHTML=html;
+      });
+    }
+  }
+};
+
+// CSS var helper for canvas
+function var_get(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+// ── Routing ──────────────────────────────────────────────────
+let current='trap';
+
+function loadMethod(key) {
+  current=key;
+  const m=METHODS[key];
+  const panel=document.getElementById('main-panel');
+  panel.innerHTML=`
+    <h1 class="method-title">${m.title}</h1>
+    <p class="method-desc">${m.desc}</p>
+    <div style="margin-bottom:1.5rem">${m.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    ${m.render()}`;
+  m.bind();
+
+  document.querySelectorAll('.nav-item').forEach(b=>{
+    const active=b.dataset.method===key;
+    b.classList.toggle('active',active);
+    b.setAttribute('aria-current', active?'true':'false');
+  });
+}
+
+document.querySelectorAll('.nav-item[data-method]').forEach(btn=>{
+  btn.addEventListener('click',()=>loadMethod(btn.dataset.method));
+});
+
+loadMethod('trap');
+</script>
+</body>
+</html>

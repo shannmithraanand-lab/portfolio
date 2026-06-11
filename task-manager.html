@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager — Shannmithra Anand</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:    #0d1b2a;
+      --navy-2:  #132337;
+      --navy-3:  #0a1520;
+      --teal:    #2dd4bf;
+      --teal-dim:#1a9e8e;
+      --warm:    #f5f0e8;
+      --muted:   #8fa3b1;
+      --white:   #ffffff;
+      --radius:  6px;
+      --font-display: 'Fraunces', Georgia, serif;
+      --font-body:    'Inter', system-ui, sans-serif;
+      --focus-ring: 0 0 0 3px var(--teal);
+
+      --priority-high:   #f87171;
+      --priority-medium: #fbbf24;
+      --priority-low:    #34d399;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--font-body);
+      background: var(--navy);
+      color: var(--warm);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    a { color: var(--teal); text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: var(--white); }
+    *:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius); }
+    .skip-link {
+      position: absolute; top: -100%; left: 1rem;
+      background: var(--teal); color: var(--navy);
+      padding: 0.5rem 1rem; font-weight: 600;
+      border-radius: 0 0 var(--radius) var(--radius);
+      z-index: 9999; transition: top 0.15s;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,27,42,0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    header .inner {
+      max-width: 1100px; margin-inline: auto; padding-inline: 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 3.75rem;
+    }
+    .logo {
+      font-family: var(--font-display); font-weight: 700; font-size: 1.1rem;
+      color: var(--white); text-decoration: none;
+    }
+    .back-link {
+      font-size: 0.8rem; font-weight: 600;
+      padding: 0.4rem 1rem;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      color: var(--muted); border-radius: 999px; text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .back-link:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* ── Page layout ── */
+    main {
+      max-width: 1100px; margin-inline: auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    .page-header { margin-bottom: 2rem; }
+    .eyebrow {
+      display: inline-block; font-size: 0.72rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--teal); margin-bottom: 0.5rem; font-weight: 600;
+    }
+    h1 { font-family: var(--font-display); font-size: clamp(1.6rem,4vw,2.4rem); color: var(--white); line-height: 1.15; }
+    h1 em { font-style: italic; color: var(--teal); font-weight: 300; }
+    .page-desc { color: var(--muted); font-size: 0.9rem; margin-top: 0.5rem; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .stat {
+      background: var(--navy-2);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px; padding: 1rem 1.25rem;
+      flex: 1; min-width: 110px;
+      display: flex; flex-direction: column; gap: 0.2rem;
+    }
+    .stat-value {
+      font-family: var(--font-display); font-size: 1.8rem; font-weight: 700;
+      color: var(--white); line-height: 1;
+    }
+    .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat[data-type="done"] .stat-value { color: var(--teal); }
+    .stat[data-type="overdue"] .stat-value { color: var(--priority-high); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex; gap: 0.75rem; flex-wrap: wrap;
+      align-items: center; margin-bottom: 1.5rem;
+    }
+    .toolbar input[type="text"] {
+      flex: 1; min-width: 180px;
+      background: var(--navy-2); border: 1px solid rgba(255,255,255,0.12);
+      color: var(--warm); padding: 0.55rem 0.9rem;
+      border-radius: var(--radius); font-family: var(--font-body); font-size: 0.9rem;
+      transition: border-color 0.15s;
+    }
+    .toolbar input[type="text"]:focus { outline: none; border-color: var(--teal); box-shadow: var(--focus-ring); }
+    .toolbar select {
+      background: var(--navy-2); border: 1px solid rgba(255,255,255,0.12);
+      color: var(--muted); padding: 0.55rem 0.75rem;
+      border-radius: var(--radius); font-family: var(--font-body); font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .toolbar select:focus { outline: none; border-color: var(--teal); }
+    .btn-add {
+      background: var(--teal); color: var(--navy);
+      border: none; padding: 0.55rem 1.25rem;
+      font-size: 0.875rem; font-weight: 600;
+      border-radius: 999px; cursor: pointer;
+      font-family: var(--font-body); white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .btn-add:hover { background: var(--teal-dim); color: var(--white); }
+
+    /* ── Columns layout ── */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    @media (max-width: 720px) { .board { grid-template-columns: 1fr; } }
+
+    .column {
+      background: var(--navy-3);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 1.25rem;
+      min-height: 300px;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .col-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .col-title {
+      font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .col-title::before {
+      content: ''; width: 8px; height: 8px; border-radius: 50%;
+    }
+    [data-col="todo"] .col-title::before    { background: var(--muted); }
+    [data-col="inprogress"] .col-title::before { background: var(--priority-medium); }
+    [data-col="done"] .col-title::before    { background: var(--teal); }
+
+    .col-count {
+      background: rgba(255,255,255,0.07);
+      color: var(--muted); font-size: 0.72rem; font-weight: 600;
+      padding: 0.15rem 0.55rem; border-radius: 999px;
+    }
+    .tasks-list {
+      display: flex; flex-direction: column; gap: 0.75rem;
+      flex: 1;
+    }
+
+    /* ── Task card ── */
+    .task-card {
+      background: var(--navy-2);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: grab;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .task-card:hover {
+      border-color: rgba(45,212,191,0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .task-card.dragging {
+      opacity: 0.4; cursor: grabbing;
+    }
+    .task-card.drag-over {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 2px rgba(45,212,191,0.2);
+    }
+    .task-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 0.5rem; margin-bottom: 0.5rem;
+    }
+    .task-title {
+      font-size: 0.875rem; font-weight: 600; color: var(--white);
+      line-height: 1.3; flex: 1;
+    }
+    .task-title.completed {
+      text-decoration: line-through; color: var(--muted);
+    }
+    .priority-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+    }
+    .priority-dot[data-p="high"]   { background: var(--priority-high); }
+    .priority-dot[data-p="medium"] { background: var(--priority-medium); }
+    .priority-dot[data-p="low"]    { background: var(--priority-low); }
+
+    .task-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.5; margin-bottom: 0.75rem; }
+
+    .task-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.4rem;
+    }
+    .task-tag {
+      font-size: 0.68rem; color: var(--muted);
+      background: rgba(255,255,255,0.05);
+      padding: 0.15rem 0.5rem; border-radius: 4px;
+    }
+    .task-date {
+      font-size: 0.7rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem;
+    }
+    .task-date.overdue { color: var(--priority-high); }
+    .task-actions { display: flex; gap: 0.35rem; }
+    .btn-icon {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 0.9rem; padding: 0.2rem 0.3rem;
+      border-radius: 4px; transition: color 0.1s, background 0.1s;
+      line-height: 1;
+    }
+    .btn-icon:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+    .btn-icon.del:hover { color: var(--priority-high); }
+
+    /* ── Drop zone placeholder ── */
+    .drop-placeholder {
+      border: 2px dashed rgba(45,212,191,0.25);
+      border-radius: 8px; height: 70px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(45,212,191,0.4); font-size: 0.78rem;
+    }
+    .empty-col {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.12); font-size: 0.8rem; text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(7,15,25,0.85);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.hidden { display: none; }
+    .modal {
+      background: var(--navy-2);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 2rem;
+      width: 100%; max-width: 480px;
+      position: relative;
+    }
+    .modal h2 {
+      font-family: var(--font-display); font-size: 1.4rem;
+      color: var(--white); margin-bottom: 1.5rem; line-height: 1.2;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+    .form-group label { font-size: 0.82rem; font-weight: 500; color: var(--warm); }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: var(--navy-3); border: 1px solid rgba(255,255,255,0.12);
+      color: var(--warm); padding: 0.6rem 0.9rem;
+      border-radius: var(--radius); font-family: var(--font-body); font-size: 0.875rem;
+      transition: border-color 0.15s; width: 100%;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { outline: none; border-color: var(--teal); box-shadow: var(--focus-ring); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+    .btn-cancel {
+      background: none; border: 1.5px solid rgba(255,255,255,0.15);
+      color: var(--muted); padding: 0.6rem 1.2rem;
+      font-size: 0.875rem; font-weight: 500;
+      border-radius: 999px; cursor: pointer; font-family: var(--font-body);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-cancel:hover { border-color: var(--warm); color: var(--warm); }
+    .btn-save {
+      background: var(--teal); color: var(--navy);
+      border: none; padding: 0.6rem 1.5rem;
+      font-size: 0.875rem; font-weight: 600;
+      border-radius: 999px; cursor: pointer; font-family: var(--font-body);
+      transition: background 0.15s;
+    }
+    .btn-save:hover { background: var(--teal-dim); color: var(--white); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: var(--navy-2); border: 1px solid rgba(45,212,191,0.3);
+      color: var(--warm); padding: 0.75rem 1.25rem;
+      border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+      z-index: 300; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      transform: translateY(0); opacity: 1;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .toast.hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
+
+    /* ── Live clock ── */
+    .live-clock {
+      font-size: 0.75rem; color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- Header -->
+<header role="banner">
+  <div class="inner">
+    <a class="logo" href="index.html" aria-label="Back to portfolio home">Shannmithra.</a>
+    <span class="live-clock" id="liveClock" aria-live="off" aria-atomic="true"></span>
+    <a class="back-link" href="index.html" aria-label="Back to portfolio">← Portfolio</a>
+  </div>
+</header>
+
+<main id="main-content" tabindex="-1">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <span class="eyebrow">Real-time Project</span>
+    <h1>Task <em>Manager</em></h1>
+    <p class="page-desc">Drag tasks across columns, set priorities, add due dates. Data persists in localStorage.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar" role="region" aria-label="Task statistics" aria-live="polite" aria-atomic="true">
+    <div class="stat" data-type="total">
+      <span class="stat-value" id="statTotal">0</span>
+      <span class="stat-label">Total</span>
+    </div>
+    <div class="stat" data-type="todo">
+      <span class="stat-value" id="statTodo">0</span>
+      <span class="stat-label">To Do</span>
+    </div>
+    <div class="stat" data-type="inprogress">
+      <span class="stat-value" id="statProgress">0</span>
+      <span class="stat-label">In Progress</span>
+    </div>
+    <div class="stat" data-type="done">
+      <span class="stat-value" id="statDone">0</span>
+      <span class="stat-label">Done</span>
+    </div>
+    <div class="stat" data-type="overdue">
+      <span class="stat-value" id="statOverdue">0</span>
+      <span class="stat-label">Overdue</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar" role="search" aria-label="Filter and add tasks">
+    <input type="text" id="searchInput" placeholder="Search tasks…" aria-label="Search tasks" />
+    <select id="filterPriority" aria-label="Filter by priority">
+      <option value="">All priorities</option>
+      <option value="high">🔴 High</option>
+      <option value="medium">🟡 Medium</option>
+      <option value="low">🟢 Low</option>
+    </select>
+    <select id="filterTag" aria-label="Filter by tag">
+      <option value="">All tags</option>
+    </select>
+    <button class="btn-add" id="btnAddTask" aria-haspopup="dialog">＋ Add Task</button>
+  </div>
+
+  <!-- Board -->
+  <div class="board" id="board" role="region" aria-label="Task board">
+    <div class="column" data-col="todo" id="col-todo" aria-label="To Do column" aria-dropeffect="move">
+      <div class="col-header">
+        <span class="col-title">To Do</span>
+        <span class="col-count" id="cnt-todo">0</span>
+      </div>
+      <div class="tasks-list" id="list-todo" role="list"></div>
+    </div>
+
+    <div class="column" data-col="inprogress" id="col-inprogress" aria-label="In Progress column" aria-dropeffect="move">
+      <div class="col-header">
+        <span class="col-title">In Progress</span>
+        <span class="col-count" id="cnt-inprogress">0</span>
+      </div>
+      <div class="tasks-list" id="list-inprogress" role="list"></div>
+    </div>
+
+    <div class="column" data-col="done" id="col-done" aria-label="Done column" aria-dropeffect="move">
+      <div class="col-header">
+        <span class="col-title">Done</span>
+        <span class="col-count" id="cnt-done">0</span>
+      </div>
+      <div class="tasks-list" id="list-done" role="list"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Add/Edit Modal -->
+<div class="modal-backdrop hidden" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <h2 id="modalTitle">New Task</h2>
+    <div class="form-group">
+      <label for="taskTitle">Title *</label>
+      <input type="text" id="taskTitle" placeholder="What needs to be done?" required />
+    </div>
+    <div class="form-group">
+      <label for="taskDesc">Description</label>
+      <textarea id="taskDesc" placeholder="Optional details…"></textarea>
+    </div>
+    <div class="form-group">
+      <label for="taskPriority">Priority</label>
+      <select id="taskPriority">
+        <option value="medium">🟡 Medium</option>
+        <option value="high">🔴 High</option>
+        <option value="low">🟢 Low</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="taskTag">Tag</label>
+      <input type="text" id="taskTag" placeholder="e.g. Frontend, Design, Bug…" />
+    </div>
+    <div class="form-group">
+      <label for="taskDue">Due date</label>
+      <input type="date" id="taskDue" />
+    </div>
+    <div class="form-group">
+      <label for="taskStatus">Column</label>
+      <select id="taskStatus">
+        <option value="todo">To Do</option>
+        <option value="inprogress">In Progress</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" id="btnCancel">Cancel</button>
+      <button class="btn-save" id="btnSave">Save Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+const STORAGE_KEY = 'shann_tasks_v1';
+
+const DEFAULT_TASKS = [
+  { id: 'demo1', title: 'Design the hero section', desc: 'Typography, spacing, CTA buttons', priority: 'high', tag: 'Frontend', due: '', status: 'done', created: Date.now() - 86400000*3 },
+  { id: 'demo2', title: 'Write unit tests', desc: 'Cover edge cases for the parser module', priority: 'medium', tag: 'Testing', due: '', status: 'inprogress', created: Date.now() - 86400000 },
+  { id: 'demo3', title: 'Add dark mode toggle', desc: '', priority: 'low', tag: 'UI', due: '', status: 'todo', created: Date.now() - 3600000 },
+  { id: 'demo4', title: 'Fix nav overflow on mobile', desc: 'Hamburger menu required', priority: 'high', tag: 'Bug', due: tomorrowStr(), status: 'todo', created: Date.now() },
+];
+
+function tomorrowStr() {
+  const d = new Date(); d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0,10);
+}
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_TASKS; }
+  catch { return DEFAULT_TASKS; }
+}
+function save(tasks) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+let tasks = load();
+let editingId = null;
+let dragId = null;
+
+// ── Live clock ─────────────────────────────────────────────
+const clockEl = document.getElementById('liveClock');
+function tickClock() {
+  const now = new Date();
+  clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+// ── Render ─────────────────────────────────────────────────
+function isOverdue(due) {
+  if (!due) return false;
+  return new Date(due) < new Date(new Date().toDateString());
+}
+
+function formatDate(due) {
+  if (!due) return '';
+  const d = new Date(due);
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
+function allTags() {
+  const s = new Set(tasks.map(t => t.tag).filter(Boolean));
+  return [...s].sort();
+}
+
+function filteredTasks() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const fp = document.getElementById('filterPriority').value;
+  const ft = document.getElementById('filterTag').value;
+  return tasks.filter(t => {
+    if (q && !t.title.toLowerCase().includes(q) && !(t.desc||'').toLowerCase().includes(q)) return false;
+    if (fp && t.priority !== fp) return false;
+    if (ft && t.tag !== ft) return false;
+    return true;
+  });
+}
+
+function render() {
+  const cols = ['todo', 'inprogress', 'done'];
+  const visible = filteredTasks();
+
+  // Update tag filter options
+  const tagSelect = document.getElementById('filterTag');
+  const curTag = tagSelect.value;
+  tagSelect.innerHTML = '<option value="">All tags</option>';
+  allTags().forEach(tag => {
+    const o = document.createElement('option');
+    o.value = tag; o.textContent = tag;
+    if (tag === curTag) o.selected = true;
+    tagSelect.appendChild(o);
+  });
+
+  cols.forEach(col => {
+    const list = document.getElementById(`list-${col}`);
+    const colTasks = visible.filter(t => t.status === col);
+    list.innerHTML = '';
+
+    if (colTasks.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-col';
+      empty.setAttribute('aria-hidden', 'true');
+      empty.textContent = col === 'todo' ? '✦ Nothing queued' : col === 'inprogress' ? '⏳ Nothing in flight' : '✓ Nothing done yet';
+      list.appendChild(empty);
+    } else {
+      colTasks.forEach(task => {
+        const card = createCard(task);
+        list.appendChild(card);
+      });
+    }
+    document.getElementById(`cnt-${col}`).textContent = colTasks.length;
+  });
+
+  // Stats
+  const all = tasks;
+  document.getElementById('statTotal').textContent    = all.length;
+  document.getElementById('statTodo').textContent     = all.filter(t => t.status === 'todo').length;
+  document.getElementById('statProgress').textContent = all.filter(t => t.status === 'inprogress').length;
+  document.getElementById('statDone').textContent     = all.filter(t => t.status === 'done').length;
+  document.getElementById('statOverdue').textContent  = all.filter(t => isOverdue(t.due) && t.status !== 'done').length;
+}
+
+function createCard(task) {
+  const card = document.createElement('article');
+  card.className = 'task-card';
+  card.setAttribute('role', 'listitem');
+  card.setAttribute('draggable', 'true');
+  card.setAttribute('aria-label', `${task.title}, ${task.priority} priority${task.due ? ', due ' + formatDate(task.due) : ''}`);
+  card.dataset.id = task.id;
+
+  const overdue = isOverdue(task.due) && task.status !== 'done';
+
+  card.innerHTML = `
+    <div class="task-top">
+      <span class="task-title${task.status === 'done' ? ' completed' : ''}">${escHtml(task.title)}</span>
+      <span class="priority-dot" data-p="${task.priority}" title="${task.priority} priority" aria-hidden="true"></span>
+    </div>
+    ${task.desc ? `<p class="task-desc">${escHtml(task.desc)}</p>` : ''}
+    <div class="task-meta">
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;">
+        ${task.tag ? `<span class="task-tag">${escHtml(task.tag)}</span>` : ''}
+        ${task.due ? `<span class="task-date${overdue ? ' overdue' : ''}" aria-label="${overdue ? 'Overdue: ' : 'Due: '}${formatDate(task.due)}">📅 ${formatDate(task.due)}${overdue ? ' ⚠' : ''}</span>` : ''}
+      </div>
+      <div class="task-actions">
+        <button class="btn-icon" data-action="edit" data-id="${task.id}" aria-label="Edit ${escHtml(task.title)}" title="Edit">✎</button>
+        <button class="btn-icon del" data-action="delete" data-id="${task.id}" aria-label="Delete ${escHtml(task.title)}" title="Delete">✕</button>
+      </div>
+    </div>
+  `;
+
+  // Drag events
+  card.addEventListener('dragstart', e => {
+    dragId = task.id;
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  card.addEventListener('dragend', () => {
+    dragId = null;
+    card.classList.remove('dragging');
+    document.querySelectorAll('.drop-placeholder').forEach(p => p.remove());
+  });
+
+  // Action buttons
+  card.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      if (btn.dataset.action === 'edit') openModal(id);
+      if (btn.dataset.action === 'delete') deleteTask(id);
+    });
+  });
+
+  return card;
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Drag & drop on columns ─────────────────────────────────
+document.querySelectorAll('.tasks-list').forEach(list => {
+  list.addEventListener('dragover', e => {
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  });
+  list.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!dragId) return;
+    const col = list.closest('[data-col]').dataset.col;
+    const task = tasks.find(t => t.id === dragId);
+    if (task && task.status !== col) {
+      task.status = col;
+      save(tasks);
+      showToast(`Moved to "${colLabel(col)}" ✓`);
+      render();
+    }
+  });
+});
+
+function colLabel(c) {
+  return c === 'todo' ? 'To Do' : c === 'inprogress' ? 'In Progress' : 'Done';
+}
+
+// ── Modal ──────────────────────────────────────────────────
+const backdrop = document.getElementById('modalBackdrop');
+const titleInput = document.getElementById('taskTitle');
+
+function openModal(id = null) {
+  editingId = id;
+  document.getElementById('modalTitle').textContent = id ? 'Edit Task' : 'New Task';
+  if (id) {
+    const t = tasks.find(x => x.id === id);
+    titleInput.value = t.title;
+    document.getElementById('taskDesc').value = t.desc || '';
+    document.getElementById('taskPriority').value = t.priority;
+    document.getElementById('taskTag').value = t.tag || '';
+    document.getElementById('taskDue').value = t.due || '';
+    document.getElementById('taskStatus').value = t.status;
+  } else {
+    titleInput.value = '';
+    document.getElementById('taskDesc').value = '';
+    document.getElementById('taskPriority').value = 'medium';
+    document.getElementById('taskTag').value = '';
+    document.getElementById('taskDue').value = '';
+    document.getElementById('taskStatus').value = 'todo';
+  }
+  backdrop.classList.remove('hidden');
+  requestAnimationFrame(() => titleInput.focus());
+}
+
+function closeModal() {
+  backdrop.classList.add('hidden');
+  editingId = null;
+  document.getElementById('btnAddTask').focus();
+}
+
+document.getElementById('btnAddTask').addEventListener('click', () => openModal());
+document.getElementById('btnCancel').addEventListener('click', closeModal);
+backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !backdrop.classList.contains('hidden')) closeModal();
+});
+
+document.getElementById('btnSave').addEventListener('click', () => {
+  const title = titleInput.value.trim();
+  if (!title) { titleInput.focus(); titleInput.style.borderColor = 'var(--priority-high)'; return; }
+  titleInput.style.borderColor = '';
+
+  const taskData = {
+    title,
+    desc:     document.getElementById('taskDesc').value.trim(),
+    priority: document.getElementById('taskPriority').value,
+    tag:      document.getElementById('taskTag').value.trim(),
+    due:      document.getElementById('taskDue').value,
+    status:   document.getElementById('taskStatus').value,
+  };
+
+  if (editingId) {
+    const idx = tasks.findIndex(t => t.id === editingId);
+    tasks[idx] = { ...tasks[idx], ...taskData };
+    showToast('Task updated ✓');
+  } else {
+    tasks.push({ id: 'task_' + Date.now(), ...taskData, created: Date.now() });
+    showToast('Task added ✓');
+  }
+  save(tasks);
+  closeModal();
+  render();
+});
+
+// ── Delete ─────────────────────────────────────────────────
+function deleteTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (!confirm(`Delete "${t.title}"?`)) return;
+  tasks = tasks.filter(x => x.id !== id);
+  save(tasks);
+  showToast('Task deleted');
+  render();
+}
+
+// ── Filters ───────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('filterPriority').addEventListener('change', render);
+document.getElementById('filterTag').addEventListener('change', render);
+
+// ── Toast ──────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.add('hidden'), 2500);
+}
+
+// ── Boot ───────────────────────────────────────────────────
+render();
+</script>
+
+</body>
+</html>
